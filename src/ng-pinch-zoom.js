@@ -49,6 +49,8 @@ angular.module('ngPinchZoom', [])
     var moveX = 0;
     var moveY = 0;
 
+    var tapedTwice = false;
+
     var image = new Image();
     image.onload = function() {
       elWidth = element[0].clientWidth;
@@ -62,6 +64,8 @@ angular.module('ngPinchZoom', [])
       element.on('touchstart', touchstartHandler);
       element.on('touchmove', touchmoveHandler);
       element.on('touchend', touchendHandler);
+
+      element.on('wheel', onwheelHandler);
     };
 
     if (attrs.ngSrc) {
@@ -82,6 +86,89 @@ angular.module('ngPinchZoom', [])
       initialPositionY = positionY;
       moveX = 0;
       moveY = 0;
+
+      if(!tapedTwice) {
+        tapedTwice = true;
+        setTimeout(function() {
+          tapedTwice = false;
+        }, 300);
+      } else {
+
+        tapedTwiceHandler();
+
+        evt.preventDefault();
+
+      }
+    }
+
+    function tapedTwiceHandler() {
+      relativeScale = initialScale = scale = 1;
+      positionX = 0;
+      positionY = 0;
+
+      transformElement();
+    }
+
+    /**
+     * @param {object} evt
+     */
+    function onwheelHandler(evt) {
+      var deltaY = 0;
+
+      evt.preventDefault();
+
+      var zoomIn = false;
+
+      if (evt.deltaY) { // FireFox 17+ (IE9+, Chrome 31+?)
+        deltaY = evt.deltaY;
+      } else if (evt.wheelDelta) {
+        deltaY = -evt.wheelDelta;
+      }
+
+      if(deltaY < 0) {
+        zoomIn = true;
+      }
+
+      // As far as I know, there is no good cross-browser way to get the cursor position relative to the event target.
+      // We have to calculate the target element's position relative to the document, and subtrack that from the
+      // cursor's position relative to the document.
+      var rect = element[0].getBoundingClientRect();
+      var offsetX = evt.pageX - rect.left - window.pageXOffset;
+      var offsetY = evt.pageY - rect.top - window.pageYOffset;
+
+      originX = offsetX -
+                element[0].offsetLeft - positionX;
+      originY = offsetY -
+                element[0].offsetTop - positionX;
+
+
+      moveX = 0;
+      moveY = 0;
+
+      var factorScale = 0.2;
+
+      if(zoomIn) {
+        relativeScale += factorScale;
+      } else {
+        relativeScale -= factorScale;
+      }
+
+      if(zoomIn && initialScale === 0) {
+        initialScale = 1 + factorScale;
+      }
+
+      scale = relativeScale * initialScale;
+
+      positionX = (originX * (1 - relativeScale)) / 2;
+      positionY = (originY * (1 - relativeScale)) / 2;
+
+      if (scale <= 1) {
+        relativeScale = initialScale = scale = 1;
+        positionX = 0;
+        positionY = 0;
+      }
+
+      transformElement();
     }
 
     /**
@@ -131,6 +218,18 @@ angular.module('ngPinchZoom', [])
 
         positionX = originX * (1 - relativeScale) + initialPositionX + moveX;
         positionY = originY * (1 - relativeScale) + initialPositionY + moveY;
+
+        if (scale < 1) {
+          scale = 1;
+          positionX = 0;
+          positionY = 0;
+        }
+
+        console.log("Relative Scale: " + relativeScale);
+      console.log("originX: " + originX);
+
+      console.log("scale: " + scale);
+      console.log("positionX: " + positionX);
 
         transformElement();
 
