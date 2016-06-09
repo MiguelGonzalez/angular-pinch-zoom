@@ -1,4 +1,4 @@
-/*! angular-pinch-zoom - v0.2.2 */
+/*! angular-pinch-zoom - v0.2.3 */
 angular.module('ngPinchZoom', [])
 /**
  * @ngdoc directive
@@ -113,12 +113,15 @@ angular.module('ngPinchZoom', [])
     /**
      * @param {object} evt
      */
+    var bgWidthOriginal;
+    var bgHeightOriginal;
+    var bgWidth;
+    var bgHeight;
+
     function onwheelHandler(evt) {
       var deltaY = 0;
 
       evt.preventDefault();
-
-      var zoomIn = false;
 
       if (evt.deltaY) { // FireFox 17+ (IE9+, Chrome 31+?)
         deltaY = evt.deltaY;
@@ -126,8 +129,8 @@ angular.module('ngPinchZoom', [])
         deltaY = -evt.wheelDelta;
       }
 
-      if(deltaY < 0) {
-        zoomIn = true;
+      if(scale > maxScale && deltaY < 0) {
+          return ;
       }
 
       // As far as I know, there is no good cross-browser way to get the cursor position relative to the event target.
@@ -137,36 +140,54 @@ angular.module('ngPinchZoom', [])
       var offsetX = evt.pageX - rect.left - window.pageXOffset;
       var offsetY = evt.pageY - rect.top - window.pageYOffset;
 
-      originX = offsetX -
-                element[0].offsetLeft - positionX;
-      originY = offsetY -
-                element[0].offsetTop - positionX;
+      if(bgWidth === undefined) {
+        bgWidthOriginal= bgWidth = rect.width;
+        bgHeightOriginal = bgHeight = rect.height;
+      }
 
+      // Record the offset between the bg edge and cursor:
+      var bgCursorX = offsetX - positionX;
+      var bgCursorY = offsetY - positionY;
 
-      moveX = 0;
-      moveY = 0;
+      // Use the previous offset to get the percent offset between the bg edge and cursor:
+      var bgRatioX = bgCursorX / bgWidth;
+      var bgRatioY = bgCursorY / bgHeight;
 
-      var factorScale = 0.2;
+      // Update the bg size:
+      var zoom = 0.1;
 
-      if(zoomIn) {
-        relativeScale += factorScale;
+      if (deltaY < 0) {
+        bgWidth += bgWidth * zoom;
+        bgHeight += bgHeight * zoom;
       } else {
-        relativeScale -= factorScale;
+        bgWidth -= bgWidth * zoom;
+        bgHeight -= bgHeight * zoom;
       }
 
-      if(zoomIn && initialScale === 0) {
-        initialScale = 1 + factorScale;
+      scale = bgWidth / bgWidthOriginal;
+
+      // Take the percent offset and apply it to the new size:
+      positionX = offsetX - (bgWidth * bgRatioX);
+      positionY = offsetY - (bgHeight * bgRatioY);
+
+      if (positionX > 0) {
+          positionX = 0;
+      } else if (positionX < bgWidthOriginal - bgWidth) {
+          positionX = bgWidthOriginal - bgWidth;
       }
 
-      scale = relativeScale * initialScale;
-
-      positionX = (originX * (1 - relativeScale)) / 2;
-      positionY = (originY * (1 - relativeScale)) / 2;
+      if (positionY > 0) {
+          positionY = 0;
+      } else if (positionY < bgHeightOriginal - bgHeight) {
+          positionY = bgHeightOriginal - bgHeight;
+      }
 
       if (scale <= 1) {
-        relativeScale = initialScale = scale = 1;
+        scale = 1;
         positionX = 0;
         positionY = 0;
+        bgWidth = bgWidthOriginal;
+        bgHeight = bgHeightOriginal;
       }
 
       transformElement();

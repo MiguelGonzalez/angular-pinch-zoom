@@ -1,6 +1,6 @@
 {
   "name": "angular-pinch-zoom",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "pinch-zoom directive for AngularJS",
   "main": "dist/ng-pinch-zoom.js",
   "repository": {
