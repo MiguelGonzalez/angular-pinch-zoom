@@ -1,4 +1,4 @@
-/*! angular-pinch-zoom - v0.2.5 */
+/*! angular-pinch-zoom - v0.2.7 */
 angular.module('ngPinchZoom', [])
 /**
  * @ngdoc directive
@@ -82,6 +82,22 @@ angular.module('ngPinchZoom', [])
     function touchstartHandler(evt) {
       var touches = evt.originalEvent ? evt.originalEvent.touches : evt.touches;
 
+      if(touches.length >=  2) {
+        tapedTwice = false;
+
+        if(timeOutTapedTwice !== undefined) {
+            clearTimeout(timeOutTapedTwice);
+            timeOutTapedTwice = undefined;
+          }
+      }
+
+      startX = touches[0].clientX;
+      startY = touches[0].clientY;
+      initialPositionX = positionX;
+      initialPositionY = positionY;
+      moveX = 0;
+      moveY = 0;
+
       if(touches.length == 1) {
         if(!tapedTwice) {
           tapedTwice = true;
@@ -100,13 +116,6 @@ angular.module('ngPinchZoom', [])
 
           evt.preventDefault();
         }
-      } else {
-        startX = touches[0].clientX;
-        startY = touches[0].clientY;
-        initialPositionX = positionX;
-        initialPositionY = positionY;
-        moveX = 0;
-        moveY = 0;
       }
     }
 
@@ -173,6 +182,10 @@ angular.module('ngPinchZoom', [])
       }
 
       scale = bgWidth / bgWidthOriginal;
+
+      if(scale >= maxScale) {
+        return ;
+      }
 
       // Take the percent offset and apply it to the new size:
       positionX = offsetX - (bgWidth * bgRatioX);
@@ -246,6 +259,10 @@ angular.module('ngPinchZoom', [])
         relativeScale = distance / initialDistance;
         scale = relativeScale * initialScale;
 
+        if(scale >= maxScale) {
+          return ;
+        }
+
         positionX = originX * (1 - relativeScale) + initialPositionX + moveX;
         positionY = originY * (1 - relativeScale) + initialPositionY + moveY;
 
@@ -254,12 +271,6 @@ angular.module('ngPinchZoom', [])
           positionX = 0;
           positionY = 0;
         }
-
-        console.log("Relative Scale: " + relativeScale);
-      console.log("originX: " + originX);
-
-      console.log("scale: " + scale);
-      console.log("positionX: " + positionX);
 
         transformElement();
 

@@ -182,6 +182,10 @@ angular.module('ngPinchZoom', [])
 
       scale = bgWidth / bgWidthOriginal;
 
+      if(scale >= maxScale) {
+        return ;
+      }
+
       // Take the percent offset and apply it to the new size:
       positionX = offsetX - (bgWidth * bgRatioX);
       positionY = offsetY - (bgHeight * bgRatioY);
@@ -254,6 +258,10 @@ angular.module('ngPinchZoom', [])
         relativeScale = distance / initialDistance;
         scale = relativeScale * initialScale;
 
+        if(scale >= maxScale) {
+          return ;
+        }
+
         positionX = originX * (1 - relativeScale) + initialPositionX + moveX;
         positionY = originY * (1 - relativeScale) + initialPositionY + moveY;
 
@@ -262,12 +270,6 @@ angular.module('ngPinchZoom', [])
           positionX = 0;
           positionY = 0;
         }
-
-        console.log("Relative Scale: " + relativeScale);
-      console.log("originX: " + originX);
-
-      console.log("scale: " + scale);
-      console.log("positionX: " + positionX);
 
         transformElement();
 
