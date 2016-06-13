@@ -1,4 +1,4 @@
-/*! angular-pinch-zoom - v0.2.4 */
+/*! angular-pinch-zoom - v0.2.5 */
 angular.module('ngPinchZoom', [])
 /**
  * @ngdoc directive
