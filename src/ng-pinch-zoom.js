@@ -81,29 +81,31 @@ angular.module('ngPinchZoom', [])
     function touchstartHandler(evt) {
       var touches = evt.originalEvent ? evt.originalEvent.touches : evt.touches;
 
-      startX = touches[0].clientX;
-      startY = touches[0].clientY;
-      initialPositionX = positionX;
-      initialPositionY = positionY;
-      moveX = 0;
-      moveY = 0;
+      if(touches.length == 1) {
+        if(!tapedTwice) {
+          tapedTwice = true;
 
-      if(!tapedTwice) {
-        tapedTwice = true;
+          if(timeOutTapedTwice !== undefined) {
+            clearTimeout(timeOutTapedTwice);
+            timeOutTapedTwice = undefined;
+          }
 
-        if(timeOutTapedTwice !== undefined) {
-          clearTimeout(timeOutTapedTwice);
-          timeOutTapedTwice = undefined;
+          timeOutTapedTwice = setTimeout(function() {
+            tapedTwice = false;
+            timeOutTapedTwice = undefined;
+          }, 275);
+        } else {
+          tapedTwiceHandler();
+
+          evt.preventDefault();
         }
-
-        timeOutTapedTwice = setTimeout(function() {
-          tapedTwice = false;
-          timeOutTapedTwice = undefined;
-        }, 275);
       } else {
-        tapedTwiceHandler();
-
-        evt.preventDefault();
+        startX = touches[0].clientX;
+        startY = touches[0].clientY;
+        initialPositionX = positionX;
+        initialPositionY = positionY;
+        moveX = 0;
+        moveY = 0;
       }
     }
 
