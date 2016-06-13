@@ -1,4 +1,4 @@
-/*! angular-pinch-zoom - v0.2.7 */
+/*! angular-pinch-zoom - v0.2.8 */
 angular.module('ngPinchZoom', [])
 /**
  * @ngdoc directive
@@ -183,7 +183,9 @@ angular.module('ngPinchZoom', [])
 
       scale = bgWidth / bgWidthOriginal;
 
-      if(scale >= maxScale) {
+      if(scale > maxScale) {
+      	scale = maxScale;
+
         return ;
       }
 
@@ -259,7 +261,9 @@ angular.module('ngPinchZoom', [])
         relativeScale = distance / initialDistance;
         scale = relativeScale * initialScale;
 
-        if(scale >= maxScale) {
+        if(scale > maxScale) {
+          scale = maxScale;
+
           return ;
         }
 
