@@ -1,4 +1,4 @@
-/*! angular-pinch-zoom - v0.2.2 */
+/*! angular-pinch-zoom - v0.2.3 */
 angular.module('ngPinchZoom', [])
 /**
  * @ngdoc directive
@@ -78,6 +78,7 @@ angular.module('ngPinchZoom', [])
     /**
      * @param {object} evt
      */
+    var timeOutTapedTwice;
     function touchstartHandler(evt) {
       var touches = evt.originalEvent ? evt.originalEvent.touches : evt.touches;
 
@@ -90,15 +91,19 @@ angular.module('ngPinchZoom', [])
 
       if(!tapedTwice) {
         tapedTwice = true;
-        setTimeout(function() {
+        timeOutTapedTwice = setTimeout(function() {
           tapedTwice = false;
-        }, 300);
+          timeOutTapedTwice = undefined;
+        }, 275);
       } else {
-
         tapedTwiceHandler();
 
         evt.preventDefault();
 
+        if(timeOutTapedTwice !== undefined) {
+          clearTimeout(timeOutTapedTwice);
+          timeOutTapedTwice = undefined;
+        }
       }
     }
 

@@ -77,6 +77,7 @@ angular.module('ngPinchZoom', [])
     /**
      * @param {object} evt
      */
+    var timeOutTapedTwice;
     function touchstartHandler(evt) {
       var touches = evt.originalEvent ? evt.originalEvent.touches : evt.touches;
 
@@ -89,15 +90,20 @@ angular.module('ngPinchZoom', [])
 
       if(!tapedTwice) {
         tapedTwice = true;
-        setTimeout(function() {
-          tapedTwice = false;
-        }, 300);
-      } else {
 
+        if(timeOutTapedTwice !== undefined) {
+          clearTimeout(timeOutTapedTwice);
+          timeOutTapedTwice = undefined;
+        }
+
+        timeOutTapedTwice = setTimeout(function() {
+          tapedTwice = false;
+          timeOutTapedTwice = undefined;
+        }, 275);
+      } else {
         tapedTwiceHandler();
 
         evt.preventDefault();
-
       }
     }
 
