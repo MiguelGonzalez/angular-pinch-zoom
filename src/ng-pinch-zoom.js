@@ -145,9 +145,6 @@ angular.module('ngPinchZoom', [])
         deltaY = -evt.wheelDelta;
       }
 
-      if(scale > maxScale && deltaY < 0) {
-          return ;
-      }
 
       // As far as I know, there is no good cross-browser way to get the cursor position relative to the event target.
       // We have to calculate the target element's position relative to the document, and subtrack that from the
@@ -183,7 +180,7 @@ angular.module('ngPinchZoom', [])
       scale = bgWidth / bgWidthOriginal;
 
       if(scale > maxScale) {
-      	scale = maxScale;
+        scale = maxScale;
 
         return ;
       }
@@ -327,8 +324,13 @@ angular.module('ngPinchZoom', [])
      * @return {number}
      */
     function getDistance(touches) {
-      var d = Math.sqrt(Math.pow(touches[0].clientX - touches[1].clientX, 2) +
+      var d;
+      try {
+        d = Math.sqrt(Math.pow(touches[0].clientX - touches[1].clientX, 2) +
                         Math.pow(touches[0].clientY - touches[1].clientY, 2));
+      } catch(e) {
+        return 0;
+      }
       return parseInt(d, 10);
     }
 
