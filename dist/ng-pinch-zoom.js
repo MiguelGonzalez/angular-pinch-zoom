@@ -1,4 +1,4 @@
-/*! angular-pinch-zoom - v0.2.3 */
+/*! angular-pinch-zoom - v0.2.4 */
 angular.module('ngPinchZoom', [])
 /**
  * @ngdoc directive
@@ -91,6 +91,12 @@ angular.module('ngPinchZoom', [])
 
       if(!tapedTwice) {
         tapedTwice = true;
+
+        if(timeOutTapedTwice !== undefined) {
+          clearTimeout(timeOutTapedTwice);
+          timeOutTapedTwice = undefined;
+        }
+
         timeOutTapedTwice = setTimeout(function() {
           tapedTwice = false;
           timeOutTapedTwice = undefined;
@@ -99,11 +105,6 @@ angular.module('ngPinchZoom', [])
         tapedTwiceHandler();
 
         evt.preventDefault();
-
-        if(timeOutTapedTwice !== undefined) {
-          clearTimeout(timeOutTapedTwice);
-          timeOutTapedTwice = undefined;
-        }
       }
     }
 
