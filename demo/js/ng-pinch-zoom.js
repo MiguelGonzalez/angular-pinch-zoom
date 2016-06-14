@@ -1,4 +1,4 @@
-/*! angular-pinch-zoom - v0.2.9 */
+/*! angular-pinch-zoom - v0.3.0 */
 angular.module('ngPinchZoom', [])
 /**
  * @ngdoc directive
@@ -83,12 +83,7 @@ angular.module('ngPinchZoom', [])
       var touches = evt.originalEvent ? evt.originalEvent.touches : evt.touches;
 
       if(touches.length >=  2) {
-        tapedTwice = false;
-
-        if(timeOutTapedTwice !== undefined) {
-            clearTimeout(timeOutTapedTwice);
-            timeOutTapedTwice = undefined;
-          }
+        cleanEventTapedTwice();
       }
 
       startX = touches[0].clientX;
@@ -108,15 +103,24 @@ angular.module('ngPinchZoom', [])
           }
 
           timeOutTapedTwice = setTimeout(function() {
-            tapedTwice = false;
-            timeOutTapedTwice = undefined;
+            cleanEventTapedTwice();
           }, 275);
         } else {
-          tapedTwiceHandler();
-
           evt.preventDefault();
+
+          cleanEventTapedTwice();
+          tapedTwiceHandler();
         }
       }
+    }
+
+    function cleanEventTapedTwice() {
+      tapedTwice = false;
+
+      if(timeOutTapedTwice !== undefined) {
+          clearTimeout(timeOutTapedTwice);
+          timeOutTapedTwice = undefined;
+        }
     }
 
     function tapedTwiceHandler() {
@@ -136,9 +140,9 @@ angular.module('ngPinchZoom', [])
     var bgHeight;
 
     function onwheelHandler(evt) {
-      var deltaY = 0;
-
       evt.preventDefault();
+
+      var deltaY = 0;
 
       if (evt.deltaY) { // FireFox 17+ (IE9+, Chrome 31+?)
         deltaY = evt.deltaY;
@@ -217,6 +221,8 @@ angular.module('ngPinchZoom', [])
      * @param {object} evt
      */
     function touchmoveHandler(evt) {
+      cleanEventTapedTwice();
+
       var touches = evt.originalEvent ? evt.originalEvent.touches : evt.touches;
 
       if (mode === '') {
@@ -225,7 +231,6 @@ angular.module('ngPinchZoom', [])
           mode = 'swipe';
 
         } else if (touches.length === 2) {
-
           mode = 'pinch';
 
           initialScale = scale;
@@ -240,7 +245,7 @@ angular.module('ngPinchZoom', [])
         }
       }
 
-      if (mode === 'swipe') {
+      if (mode === 'swipe' && touches.length === 1) {
         evt.preventDefault();
 
         moveX = touches[0].clientX - startX;
@@ -251,7 +256,7 @@ angular.module('ngPinchZoom', [])
 
         transformElement();
 
-      } else if (mode === 'pinch') {
+      } else if (mode === 'pinch' && touches.length === 2) {
         evt.preventDefault();
 
         distance = getDistance(touches);
@@ -274,7 +279,6 @@ angular.module('ngPinchZoom', [])
         }
 
         transformElement();
-
       }
     }
 
@@ -285,11 +289,12 @@ angular.module('ngPinchZoom', [])
       var touches = evt.originalEvent ? evt.originalEvent.touches : evt.touches;
 
       if (mode === '' || touches.length > 0) {
+        evt.preventDefault();
+
         return;
       }
 
       if (scale < 1) {
-
         scale = 1;
         positionX = 0;
         positionY = 0;
@@ -318,6 +323,8 @@ angular.module('ngPinchZoom', [])
 
       transformElement(0.1);
       mode = '';
+
+      evt.preventDefault();
     }
 
     /**
@@ -330,6 +337,7 @@ angular.module('ngPinchZoom', [])
         d = Math.sqrt(Math.pow(touches[0].clientX - touches[1].clientX, 2) +
                         Math.pow(touches[0].clientY - touches[1].clientY, 2));
       } catch(e) {
+        alert(e);
         return 0;
       }
       return parseInt(d, 10);
